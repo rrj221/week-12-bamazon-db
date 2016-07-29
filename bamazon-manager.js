@@ -28,7 +28,7 @@ inquirer.prompt([{
       console.log('view products');
       viewProducts();
     } else if(answers.startOptions === menuOptions[1]) {   //low inventory
-      connection.query('SELECT * FROM products WHERE stockQuantity < ?', [10000], function(err, results) {
+      connection.query('SELECT * FROM products WHERE stockQuantity < ?', [1000], function(err, results) {
         if (err) throw err;
         console.log('Low Inventory');
         showTable(results);
