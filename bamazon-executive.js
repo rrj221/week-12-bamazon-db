@@ -31,7 +31,6 @@ inquirer.prompt([{
 function showDeptTable() {
   connection.query('SELECT * FROM departments', function (err, results) {
     if (err) throw err;
-    console.log(results);
     var table = new Table();
     table.push([
       'Department ID'.bgRed,
