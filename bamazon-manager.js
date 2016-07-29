@@ -2,6 +2,7 @@ var inquirer = require('inquirer');
 var mysql = require('mysql');
 var Table = require('terminal-table');
 var colors = require('colors');
+var accounting = require('accounting');
 // var customer = require('./bamazon-customer.js');
 var menuOptions = ['View Products for Sale', 'Low Inventory', 'Add to Inventory', 'Add New Product'];
 
@@ -71,22 +72,8 @@ function viewProducts() {
   connection.query('SELECT * FROM products', function (err, results) {
     if (err) throw err;
     console.log('Products for Sale');
-
     showTable(results);
     connection.end();
-
-    // inquirer.prompt([{
-    //   name: 'itemToAddTo',
-    //   message: 'Please enter the id of the product you would like to add more of'
-    // },
-    // {
-    //   name: 'qty',
-    //   message: 'Please enter the quanity you would like to add'
-    // }]).then(function (answers) {
-    //   var id = parseInt(answers.itemToAddTo);
-    //   var qtyToAdd = parseInt(answers.qty);
-    //   addInvToDb(id, qtyToAdd);
-  //   })
   });
 }
 
@@ -104,20 +91,18 @@ function showTable(results) {
       row.itemId,
       row.productName,
       row.departmentName,
-      row.price,
-      row.stockQuantity
+      accounting.formatMoney(row.price),
+      accounting.formatNumber(row.stockQuantity)
     ]);
   });
   console.log('' + table);
 };
 
 function addInvToDb(itemId, qtyToAdd) {
-  console.log(typeof itemId, itemId);
   connection.query('SELECT stockQuantity from products WHERE ?', {
     itemId: itemId
   }, function(err, results) {
     if (err) throw err;
-    console.log(results);
     var oldQty = results[0].stockQuantity;
     var newQty = oldQty + qtyToAdd;
     connection.query('UPDATE products SET ? WHERE ?', [{
@@ -140,22 +125,23 @@ function addInvToDb(itemId, qtyToAdd) {
 function createItem() {
 	connection.query('SELECT DISTINCT departmentName from departments', function (err, results) {
 		if (err) throw err;
+
+		//the manager has to choose a department that already exists or he/she will break the database
+		//only the executive can add a new department
 		var departmentsArray = [];
-		console.log(results);
 		results.forEach(function (row) {
 			departmentsArray.push(row.departmentName);
 		});
-		console.log(departmentsArray);
 
 	  inquirer.prompt([{
-	    name: 'productName',
-	    message: 'What is the name of the product you would like to add?'
-	  },
-	  {
 	    name: 'departmentName',
 	    type: 'list',
 	    message: 'What is the department name of the product?', 
 	    choices: departmentsArray
+	  },
+	  {
+	    name: 'productName',
+	    message: 'What is the name of the product you would like to add?'
 	  },
 	  {
 	    name: 'price',
