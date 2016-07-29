@@ -75,7 +75,6 @@ function createDepartment() {
       productSales: 0
     }, function (err, results) {
       if (err) throw err;
-      console.log(results);
       console.log('Updated Departments List');
       showDeptTable(results);
     });
